@@ -22,4 +22,15 @@ jobs:
             whoami
             hostname
             uptime
+      - name: Check if Apache is Installed
+        run: |
+          ssh -o StrictHostKeyChecking=no devuser@54.227.114.152 "
+            echo 'Checking Apache package...'
+            
+            if dpkg -l | grep -q apache2; then
+              echo '✅ Apache is installed'
+            else
+              echo '❌ Apache is NOT installed'
+            fi
+            
           "
