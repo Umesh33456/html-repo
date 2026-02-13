@@ -1,36 +1,36 @@
-name: SSH Test
+name: Check and Install Apache
 
 on:
   workflow_dispatch:
 
 jobs:
-  test-ssh:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Setup SSH key
+      - name: Setup SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.SSH_PRIVATE_KEY }}" > ~/.ssh/id_rsa
           chmod 600 ~/.ssh/id_rsa
           ssh-keyscan -H 54.227.114.152 >> ~/.ssh/known_hosts
 
-      - name: Test SSH Connection
-        run: |
-          ssh -o StrictHostKeyChecking=no devuser@54.227.114.152 "
-            echo '✅ Connected successfully'
-            whoami
-            hostname
-            uptime
-      - name: Check if Apache is Installed
+      - name: Check and Install Apache
         run: |
           ssh -o StrictHostKeyChecking=no devuser@54.227.114.152 "
             echo 'Checking Apache package...'
-            
+
             if dpkg -l | grep -q apache2; then
-              echo '✅ Apache is installed'
+              echo '✅ Apache already installed'
             else
-              echo '❌ Apache is NOT installed'
+              echo '🚀 Installing Apache...'
+              sudo apt update -y
+              sudo apt install apache2 -y
+              sudo systemctl enable apache2
+              sudo systemctl start apache2
+              echo '✅ Apache installed successfully'
             fi
-            
+
+            echo 'Current Apache Status:'
+            sudo systemctl status apache2 --no-pager
           "
